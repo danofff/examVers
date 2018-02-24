@@ -12,7 +12,7 @@ namespace Model.Human
     [Serializable]
     public class Employee:Person
     {
-        private string pathEmployeeSave { get;}
+        private string pathEmployeeSave { get; set; }
         public Guid IdEmployee { get; set; }
         public Position.Position Position { get; set; }
         public double Salary { get; set; }
@@ -21,7 +21,7 @@ namespace Model.Human
         {
             Position = new Position.Position(position.manager);
             IdEmployee = Guid.NewGuid();
-            pathEmployeeSave = IdEmployee.ToString() + ".xml";
+            pathEmployeeSave = Name.Replace(" ","")+ ".xml";
             Salary = Position.BaseSalary;
         }
 
@@ -29,37 +29,7 @@ namespace Model.Human
         {
             IdEmployee = Guid.NewGuid();
             Position = pos;
-            pathEmployeeSave = IdEmployee.ToString() + ".xml";
-        }
-
-
-        public void saveEmployeeCard()
-        {
-            XmlSerializer formatter = new XmlSerializer(typeof(Employee));
-            try
-            {
-                using (FileStream fs = new FileStream(pathEmployeeSave, FileMode.OpenOrCreate))
-                {
-                    formatter.Serialize(fs, this);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        public void deleteEmployeeCard()
-        {
-            FileInfo fi = new FileInfo(pathEmployeeSave);
-            if (fi.Exists)
-            {
-                fi.Delete();
-            }
-            else
-            {
-                Console.WriteLine($"Нет файла {this.Name} сотрудника");
-            }
+            pathEmployeeSave = Name.Replace(" ", "") + ".xml";
         }
         public override void Print()
         {

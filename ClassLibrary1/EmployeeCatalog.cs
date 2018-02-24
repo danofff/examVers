@@ -15,26 +15,50 @@ namespace Model.Human
             private string pathToLogData = "logData.txt";
 
             public bool CreateEmployee(Employee employee)
-            {
-                employee.saveEmployeeCard();
+            {              
                 List<Employee> employeeList = GetEmployees();
                 employeeList.Add(employee);
 
                 XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
-                try
-                {                  
-                    using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
-                    {
-                        formatter.Serialize(fs, employeeList);
-                    }
-                    logData(employee.Name + " was created");
-                    return true;
-                }
-                catch (Exception e)
+
+                FileInfo fi = new FileInfo(pathToEmployeeCatalog);
+                if (fi.Exists)
                 {
-                    Console.WriteLine(e.Message);
-                    logData("unseccsessed employee creation");
-                    return false;
+                    try
+                    {
+                        using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.Truncate))
+                        {
+                            formatter.Serialize(fs, employeeList);
+                        }
+                        logData(employee.Name + " was created");
+                        CreateEmployeeCard(employee);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        logData("unseccsessed employee creation");
+                        return false;
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
+                        {
+                            formatter.Serialize(fs, employeeList);
+                        }
+                        logData(employee.Name + " was created");
+                        CreateEmployeeCard(employee);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        logData("unseccsessed employee creation");
+                        return false;
+                    }
                 }
             }
             public List<Employee> GetEmployees()
@@ -54,35 +78,54 @@ namespace Model.Human
 
             public void DeleteEmployee(string name)
             {
-                Employee emplExist = FindByName(name);
-                if (emplExist == null)
+            Employee emplExist = FindByName(name);        
+            if (emplExist == null)
+            {
+                logData("unsucsessful try employee delete");
+                return;
+            }
+            List<Employee> employeeList = GetEmployees();
+            List<Employee> newEmployeeList = new List<Employee>();
+            for(int i = 0; i < employeeList.Count; i++)
+            {
+                if (employeeList[i].Name != emplExist.Name)
                 {
-                    logData("unsucsessful try employee delete");
-                    return;
+                    newEmployeeList.Add(employeeList[i]);
                 }
-                List<Employee> employeeList = GetEmployees();
-                employeeList.Remove(emplExist);
-                logData(emplExist.Name + " was deleted");
-                XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
-                FileInfo fi = new FileInfo(pathToEmployeeCatalog);
-                if (fi.Exists)
+            }
+
+            logData(emplExist.Name + " was deleted");
+            DeleteEmployeeCard(emplExist);
+            XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
+            FileInfo fi = new FileInfo(pathToEmployeeCatalog);
+            if (fi.Exists)
+            {                                 
+                try
                 {
-                    using (FileStream fs= new FileStream(pathToEmployeeCatalog, FileMode.Truncate))
+                    using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.Truncate))
                     {
-                    }
-                    
-                    try
-                    {
-                        using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
-                        {
-                            formatter.Serialize(fs, employeeList);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
+                        formatter.Serialize(fs, newEmployeeList);
                     }
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            else
+            {
+                try
+                {
+                    using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
+                    {
+                        formatter.Serialize(fs, newEmployeeList);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
             }
 
             public void EditEmployee(string name)
@@ -133,26 +176,15 @@ namespace Model.Human
 
             public Employee FindByName(string name)
             {
-                List<Employee> employeeList = new List<Employee>();
-                XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
-                FileInfo fi = new FileInfo(pathToEmployeeCatalog);
-                if (fi.Exists)
+            List<Employee> employeeList = GetEmployees();
+            for (int i = 0; i < employeeList.Count; i++)
+            {
+                if(employeeList[i].Name == name)
                 {
-                    using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
-                    {
-                        employeeList = (List<Employee>)formatter.Deserialize(fs);
-                    }
-
-                    for (int i = 0; i < employeeList.Count; i++)
-                    {
-                        if (employeeList[i].Name == name)
-                        {
-                            return employeeList[i];
-                        }
-                    }
-                        Console.WriteLine("Нет такого сотрудника");
-                }                  
-                return null;
+                    return employeeList[i];
+                }
+            }                              
+            return null;
             }
 
             public void PrintEmployees()
@@ -207,6 +239,38 @@ namespace Model.Human
             }
 
             }
-        
+
+        public void CreateEmployeeCard(Employee e)
+        {
+            string pathEmployeeSave = e.IdEmployee.ToString()+".xml";
+            XmlSerializer formatter = new XmlSerializer(typeof(Employee));
+            try
+            {
+                using (FileStream fs = new FileStream(pathEmployeeSave, FileMode.OpenOrCreate))
+                {
+                    formatter.Serialize(fs, e);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void DeleteEmployeeCard(Employee e)
+        {
+            string pathEmployeeSave = e.IdEmployee.ToString()+ ".xml";
+            FileInfo fi = new FileInfo(pathEmployeeSave);
+            if (fi.Exists)
+            {
+                File.Delete(pathEmployeeSave);
+            }
+            else
+            {
+                Console.WriteLine($"Нет файла сотрудника {e.Name}");
+            }
+        }
+
+
     }
 }
