@@ -22,12 +22,12 @@ namespace Model.Human
 
                 XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
                 try
-                {
+                {                  
                     using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
                     {
                         formatter.Serialize(fs, employeeList);
                     }
-                    logData(employee.Name + "was created");
+                    logData(employee.Name + " was created");
                     return true;
                 }
                 catch (Exception e)
@@ -60,20 +60,13 @@ namespace Model.Human
                     logData("unsucsessful try employee delete");
                     return;
                 }
-
                 List<Employee> employeeList = GetEmployees();
+                employeeList.Remove(emplExist);
+                logData(emplExist.Name + " was deleted");
                 XmlSerializer formatter = new XmlSerializer(typeof(List<Employee>));
                 FileInfo fi = new FileInfo(pathToEmployeeCatalog);
                 if (fi.Exists)
                 {
-                    using (FileStream fs = new FileStream(pathToEmployeeCatalog, FileMode.OpenOrCreate))
-                    {
-                        employeeList = (List<Employee>)formatter.Deserialize(fs);
-                    }
-
-                    employeeList.Remove(emplExist);
-                    logData(emplExist.Name + "was deleted");
-
                     using (FileStream fs= new FileStream(pathToEmployeeCatalog, FileMode.Truncate))
                     {
                     }
@@ -196,18 +189,22 @@ namespace Model.Human
 
             private void logData(string data)
             {
-                FileInfo fi = new FileInfo(pathToLogData);
-                if (!fi.Exists)
-                {
-                    fi.Create();              
-                }
 
-                using (StreamWriter sw = new StreamWriter(pathToLogData,true, System.Text.Encoding.Default))
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(pathToLogData, true, System.Text.Encoding.Default))
                 {
-                    data = DateTime.Now +" - " + data;
+                    data = DateTime.Now + " - " + data;
                     sw.WriteLine(data);
                     sw.Close();
                 }
+            }
+            catch(Exception e)
+            {
+
+                Console.WriteLine("Can not log data");
+                Console.WriteLine(e.Message);
+            }
 
             }
         

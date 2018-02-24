@@ -25,7 +25,6 @@ namespace examVers
             posCatalog.CreatePosition(p4);
             posCatalog.CreatePosition(p5);
 
-
             Employee empl1 = new Employee(p1);
             empl1.Name = "John Doe";
             Employee empl2 = new Employee(p2);
@@ -44,6 +43,8 @@ namespace examVers
             emplCat.CreateEmployee(empl3);
             emplCat.CreateEmployee(empl4);
             emplCat.CreateEmployee(empl5);
+
+            emplCat.DeleteEmployee("John Man");
 
         }
     }
