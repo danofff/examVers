@@ -29,13 +29,13 @@ namespace examVers
             Employee empl1 = new Employee(p1);
             empl1.Name = "John Doe";
             Employee empl2 = new Employee(p2);
-            empl1.Name = "John Man";
+            empl2.Name = "John Man";
             Employee empl3 = new Employee(p3);
-            empl1.Name = "John Glu";
+            empl3.Name = "John Glu";
             Employee empl4 = new Employee(p4);
-            empl1.Name = "John Sam";
+            empl4.Name = "John Sam";
             Employee empl5 = new Employee(p5);
-            empl1.Name = "John Ans";
+            empl5.Name = "John Ans";
 
             EmployeeCatalog emplCat = new EmployeeCatalog();
 
